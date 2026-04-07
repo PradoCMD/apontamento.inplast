@@ -13,8 +13,9 @@ import { motivosRouter } from "./routes/motivos.js";
 import { anexosRouter } from "./routes/anexos.js";
 import { seedMotivos } from "./services/seed.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Use process.cwd() instead of import.meta as it's safer for bundled CJS
+const publicDir = path.resolve(process.cwd(), "dist", "public");
+const uploadDir = path.resolve(process.cwd(), process.env.UPLOAD_DIR || "uploads");
 
 const app = express();
 const PORT = parseInt(process.env.PORT || "3000");
@@ -54,9 +55,11 @@ app.use("/uploads", express.static(path.resolve(process.env.UPLOAD_DIR || "./upl
 
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
-  const publicDir = path.resolve(__dirname, "public");
+  console.log(`📦 Serving static files from: ${publicDir}`);
   app.use(express.static(publicDir));
-  app.get("*", (_req, res) => {
+  app.get("*", (req, res) => {
+    // If it's an API route that doesn't exist, return 404
+    if (req.path.startsWith("/api")) return res.status(404).json({ error: "Not found" });
     res.sendFile(path.join(publicDir, "index.html"));
   });
 }
