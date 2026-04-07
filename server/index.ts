@@ -80,7 +80,7 @@ async function start() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Inplast Aponta v1.0.2-fix running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 Inplast Aponta v1.0.3-stable running on http://0.0.0.0:${PORT}`);
   });
 }
 

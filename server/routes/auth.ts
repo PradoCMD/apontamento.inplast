@@ -34,9 +34,11 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       token,
       user: { id: user.id, username: user.username, nome: user.nome, role: user.role, ativo: user.ativo },
     });
-  } catch (err) {
-    console.error("Login error:", err);
-    return res.status(500).json({ error: "Erro interno do servidor" });
+  } catch (err: any) {
+    console.error("❌ CRITICAL LOGIN ERROR:", err);
+    // Explicit error message for easier debugging in Coolify logs
+    const errorMsg = err?.message || "Erro desconhecido no servidor";
+    return res.status(500).json({ error: `Erro interno: ${errorMsg}` });
   }
 });
 
