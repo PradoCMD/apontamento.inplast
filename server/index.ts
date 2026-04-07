@@ -20,7 +20,18 @@ const app = express();
 const PORT = parseInt(process.env.PORT || "3000");
 
 // Database
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Support both DATABASE_URL or individual variables (safer for special characters in password)
+const pool = new Pool(
+  process.env.DATABASE_URL 
+    ? { connectionString: process.env.DATABASE_URL }
+    : {
+        host: process.env.DB_HOST || "db",
+        port: parseInt(process.env.DB_PORT || "5432"),
+        user: process.env.POSTGRES_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.POSTGRES_DB,
+      }
+);
 export const db = drizzle(pool, { schema });
 
 // Middleware
