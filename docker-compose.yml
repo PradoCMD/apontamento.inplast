@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: aponta_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aponta}
+      POSTGRES_USER: ${POSTGRES_USER:-aponta_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aponta_user} -d ${POSTGRES_DB:-aponta}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aponta_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-aponta_user}:${DB_PASSWORD}@db:5432/${POSTGRES_DB:-aponta}
+      JWT_SECRET: ${JWT_SECRET}
+      UPLOAD_DIR: /app/uploads
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-https://n8n.inplast.local}
+      SANKHYA_BASE_URL: ${SANKHYA_BASE_URL:-}
+      SANKHYA_TOKEN: ${SANKHYA_TOKEN:-}
+    ports:
+      - "${APP_PORT:-4001}:3000"
+    volumes:
+      - app_data:/app/data
+      - uploads_data:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres_data:
+  app_data:
+  uploads_data:
