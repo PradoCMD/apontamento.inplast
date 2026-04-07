@@ -38,7 +38,12 @@ app.use((req, res, next) => {
 
 // Health check
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", app: "inplast-aponta", timestamp: new Date().toISOString() });
+  res.json({ 
+    status: "ok",
+    app: "inplast-aponta", 
+    version: "1.0.2-fix",
+    timestamp: new Date().toISOString() 
+  });
 });
 
 // API Routes
@@ -75,7 +80,7 @@ async function start() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Inplast Aponta running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 Inplast Aponta v1.0.2-fix running on http://0.0.0.0:${PORT}`);
   });
 }
 
