@@ -45,7 +45,7 @@ jobs:
           # Confirming image name is fully lowercase
           tags: |
             ghcr.io/pradocmd/apontamento.inplast:latest
-            ghcr.io/pradocmd/apontamento.inplast:v1.0.3
+            ghcr.io/pradocmd/apontamento.inplast:v1.0.4
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
