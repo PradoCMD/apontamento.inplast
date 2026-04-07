@@ -5,25 +5,24 @@ RUN apk add --no-cache \
     postgresql-dev mysql-client nginx fcgi
 
 RUN docker-php-ext-configure zip \
-    && docker-php-ext-install -j$(nproc) zip pdo pdo_mysql pdo_pgsql
+    && docker-php-ext-install -j$(nproc) zip pdo pdo_mysql pgsql
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN mkdir -p /var/www/html && rm -rf /var/cache/apk/*
+RUN rm -rf /var/cache/apk/*
 
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 COPY . .
-RUN chmod -R 775 storage bootstrap/cache && chown -R www-data:www-data /var/www/html
+RUN mkdir -p storage/app/public storage/logs bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache && \
+    chown -R www-data:www-data /var/www/html
 
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
-COPY docker-entrypoint.sh /entrypoint.sh
-
-RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
 
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["php-fpm"]
