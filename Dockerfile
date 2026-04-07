@@ -1,26 +1,22 @@
-# ─── Stage 1: Build ───────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-RUN npm install -g pnpm
-
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json package-lock.json* ./
+RUN npm install
 
 COPY . .
-RUN pnpm build
+RUN npm run build
 
 # ─── Stage 2: Production ─────────────────────────────────────────────────────
 FROM node:22-alpine AS production
 
 WORKDIR /app
 
-RUN npm install -g pnpm
 RUN apk add --no-cache wget
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod
+COPY package.json package-lock.json* ./
+RUN npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/drizzle/migrations ./drizzle/migrations
