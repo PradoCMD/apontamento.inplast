@@ -43,7 +43,9 @@ jobs:
           context: .
           push: true
           # Confirming image name is fully lowercase
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: |
+            ghcr.io/pradocmd/apontamento.inplast:latest
+            ghcr.io/pradocmd/apontamento.inplast:v1.0.2
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

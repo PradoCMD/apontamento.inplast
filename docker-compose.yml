@@ -16,7 +16,7 @@ services:
       retries: 5
 
   app:
-    image: ghcr.io/pradocmd/apontamento.inplast:latest
+    image: ghcr.io/pradocmd/apontamento.inplast:v1.0.2
     container_name: aponta_app
     restart: unless-stopped
     depends_on:
