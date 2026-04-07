@@ -36,9 +36,10 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     console.error("❌ CRITICAL LOGIN ERROR:", err);
-    // Explicit error message for easier debugging in Coolify logs
-    const errorMsg = err?.message || "Erro desconhecido no servidor";
-    return res.status(500).json({ error: `Erro interno: ${errorMsg}` });
+    // Explicit error message including the CAUSE for easier debugging
+    const errorMsg = err?.message || "Erro desconhecido";
+    const errorCause = err?.cause?.message || err?.detail || "Verifique os logs (pode ser senha ou tabela ausente)";
+    return res.status(500).json({ error: `Erro interno: ${errorMsg}. Causa: ${errorCause}` });
   }
 });
 
