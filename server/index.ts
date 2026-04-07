@@ -49,7 +49,7 @@ app.get("/health", (_req, res) => {
   res.json({ 
     status: "ok",
     app: "inplast-aponta", 
-    version: "1.0.7",
+    version: "1.0.8",
     timestamp: new Date().toISOString() 
   });
 });
@@ -88,7 +88,7 @@ async function start() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Inplast Aponta v1.0.7-FIXED running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 Inplast Aponta v1.0.8-STABLE running on http://0.0.0.0:${PORT}`);
   });
 }
 
