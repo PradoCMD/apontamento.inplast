@@ -19,6 +19,7 @@ COPY package.json package-lock.json* ./
 RUN npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
+RUN mkdir -p /app/drizzle/migrations
 COPY --from=builder /app/drizzle/migrations ./drizzle/migrations
 
 ENV APP_ROOT=/app
