@@ -1,42 +1,29 @@
-FROM node:22-alpine AS builder
+FROM php:8.3-fpm-alpine
 
-WORKDIR /app
+RUN apk add --no-cache \
+    curl git unzip zip libzip-dev oniguruma-dev \
+    postgresql-dev mysql-client nginx fcgi
 
-COPY package.json package-lock.json* ./
-RUN npm install
+RUN docker-php-ext-configure zip \
+    && docker-php-ext-install -j$(nproc) zip pdo pdo_mysql pdo_pgsql
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN mkdir -p /var/www/html && rm -rf /var/cache/apk/*
+
+WORKDIR /var/www/html
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader
 
 COPY . .
-RUN npm run build
+RUN chmod -R 775 storage bootstrap/cache && chown -R www-data:www-data /var/www/html
 
-# ─── Stage 2: Production ─────────────────────────────────────────────────────
-FROM node:22-alpine AS production
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY docker-entrypoint.sh /entrypoint.sh
 
-WORKDIR /app
-
-RUN apk add --no-cache wget
-
-COPY package.json package-lock.json* ./
-RUN npm install --omit=dev
-
-COPY --from=builder /app/dist ./dist
-RUN mkdir -p /app/drizzle/migrations
-COPY --from=builder /app/drizzle/migrations ./drizzle/migrations
-
-ENV APP_ROOT=/app
-ENV UPLOAD_DIR=/app/uploads
-
-RUN addgroup -S app && adduser -S app -G app && \
-    mkdir -p /app/uploads /app/data && \
-    chown -R app:app /app
-
-EXPOSE 3000
-
-COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=5 \
-  CMD wget -qO- http://127.0.0.1:3000/health >/dev/null || exit 1
+EXPOSE 80
 
-USER app
-
-CMD ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
