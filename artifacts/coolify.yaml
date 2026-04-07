@@ -1,0 +1,38 @@
+name: Inplast Apontamento
+version: 1.0.0
+description: App de Apontamento de Produção - Inplast
+php_version: "8.3"
+engine: laravel
+
+build:
+  php:
+    composer_install: true
+    npm_install: false
+  scripts:
+    - name: Run migrations
+      command: php artisan migrate --force
+      dir: /var/www/html
+
+directories:
+  web: /var/www/html/public
+  storage: /var/www/html/storage
+
+php_configs:
+  memory_limit: 256M
+  max_execution_time: 300
+  upload_max_filesize: 20M
+  post_max_size: 20M
+
+cron_jobs: []
+
+deploy_scripts:
+  - name: Clear cache
+    command: php artisan config:clear && php artisan cache:clear
+    dir: /var/www/html
+  - name: Set permissions
+    command: chmod -R 775 storage bootstrap/cache && chown -R www-data:www-data /var/www/html
+    dir: /var/www/html
+
+health_check:
+  path: /up
+  timeout: 30

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Inplast - Apontamento de Produção</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --danger: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-900);
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .app-header h1 { font-size: 20px; font-weight: 600; }
+        .app-header .subtitle { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+        
+        .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+        
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .card-title { font-size: 16px; font-weight: 600; color: var(--gray-700); }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
+        
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gray-200);
+            color: var(--gray-700);
+        }
+        
+        .btn-large { padding: 18px 24px; font-size: 17px; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-aberta { background: #dbeafe; color: var(--primary); }
+        .status-em-producao { background: #dcfce7; color: var(--success); }
+        .status-parada { background: #fee2e2; color: var(--danger); }
+        
+        .op-card {
+            border: 2px solid var(--gray-200);
+            padding: 14px;
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .op-card:active { border-color: var(--primary); background: #eff6ff; }
+        .op-card.selected { border-color: var(--primary); background: #eff6ff; }
+        
+        .op-codigo { font-size: 18px; font-weight: 700; color: var(--primary); }
+        .op-produto { font-size: 14px; color: var(--gray-700); margin: 4px 0; }
+        .op-qtd { font-size: 13px; color: var(--gray-500); }
+        
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 500; color: var(--gray-700); margin-bottom: 6px; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .machine-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .machine-btn {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .machine-btn.selected { border-color: var(--primary); background: #eff6ff; }
+        .machine-btn .icon { font-size: 24px; margin-bottom: 4px; }
+        .machine-btn .name { font-size: 11px; font-weight: 600; color: var(--gray-700); }
+        
+        .hidden { display: none; }
+        
+        .action-row { display: flex; gap: 10px; margin-top: 16px; }
+        .action-col { flex: 1; }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            padding: 8px 16px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
+        }
+        
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: var(--gray-500);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .nav-btn.active { color: var(--primary); }
+        .nav-btn .icon { font-size: 20px; }
+        
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .login-logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .login-logo h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .login-logo p { color: var(--gray-500); font-size: 14px; }
+        
+        .main-content { padding-bottom: 80px; }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-900);
+            color: white;
+            padding: 14px 24px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .toast.show { opacity: 1; }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .confirm-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 24px;
+        }
+        
+        .confirm-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .confirm-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+        .confirm-message { color: var(--gray-500); margin-bottom: 20px; }
+        
+        .stat-card {
+            text-align: center;
+            padding: 16px;
+            background: var(--gray-50);
+            border-radius: var(--radius);
+        }
+        
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+        
+        const API_URL = window.location.origin + '/api';
+        
+        createApp({
+            setup() {
+                const page = ref('login');
+                const token = ref(localStorage.getItem('token'));
+                const usuario = ref(null);
+                
+                const loginForm = ref({ codigo: '', password: '' });
+                const loading = ref(false);
+                const toastMsg = ref('');
+                
+                const ordensProducao = ref([]);
+                const ordemSelecionada = ref(null);
+                const maquinas = ref([]);
+                const maquinaSelecionada = ref(null);
+                
+                const apontamentosHoje = ref([]);
+                const producaoAtual = ref(null);
+                
+                const formApontamento = ref({
+                    quantidade: '',
+                    unidade: 'un',
+                    observacao: '',
+                    tipo_perda: 'material',
+                    tipo_parada: 'manutencao'
+                });
+                
+                function showToast(msg) {
+                    toastMsg.value = msg;
+                    setTimeout(() => toastMsg.value = '', 3000);
+                }
+                
+                async function api(endpoint, options = {}) {
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (token.value) headers['Authorization'] = `Bearer ${token.value}`;
+                    const res = await fetch(API_URL + endpoint, { ...options, headers: { ...headers, ...options.headers } });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Erro');
+                    return data;
+                }
+                
+                async function login() {
+                    if (!loginForm.value.codigo || !loginForm.value.password) {
+                        showToast('Preencha código e senha');
+                        return;
+                    }
+                    loading.value = true;
+                    try {
+                        const data = await api('/auth/login', {
+                            method: 'POST',
+                            body: JSON.stringify(loginForm.value)
+                        });
+                        token.value = data.token;
+                        localStorage.setItem('token', data.token);
+                        usuario.value = data.usuario;
+                        page.value = 'home';
+                        loadInitialData();
+                    } catch (e) {
+                        showToast(e.message);
+                    }
+                    loading.value = false;
+                }
+                
+                function logout() {
+                    token.value = null;
+                    localStorage.removeItem('token');
+                    usuario.value = null;
+                    page.value = 'login';
+                }
+                
+                async function loadInitialData() {
+                    await Promise.all([loadOrdens(), loadMaquinas(), loadApontamentos()]);
+                }
+                
+                async function loadOrdens() {
+                    try {
+                        const data = await api('/ordens-producao/disponiveis');
+                        ordensProducao.value = data;
+                    } catch (e) { console.error(e); }
+                }
+                
+                async function loadMaquinas() {
+                    try {
+                        const data = await api('/maquinas');
+                        maquinas.value = data;
+                    } catch (e) { console.error(e); }
+                }
+                
+                async function loadApontamentos() {
+                    try {
+                        const data = await api('/apontamentos?data=' + new Date().toISOString().split('T')[0]);
+                        apontamentosHoje.value = data.data || [];
+                        producaoAtual.value = apontamentosHoje.value.find(a => a.status === 'em_andamento');
+                    } catch (e) { console.error(e); }
+                }
+                
+                async function iniciarProducao() {
+                    if (!ordemSelecionada.value || !maquinaSelecionada.value) {
+                        showToast('Selecione ordem e máquina');
+                        return;
+                    }
+                    loading.value = true;
+                    try {
+                        await api('/apontamentos/iniciar', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                ordem_producao_id: ordemSelecionada.value.id,
+                                maquina_id: maquinaSelecionada.value.id,
+                                produto_id: ordemSelecionada.value.produto_id
+                            })
+                        });
+                        showToast('Produção iniciada!');
+                        page.value = 'producao';
+                        loadApontamentos();
+                    } catch (e) { showToast(e.message); }
+                    loading.value = false;
+                }
+                
+                async function finalizarProducao() {
+                    if (!formApontamento.value.quantidade) {
+                        showToast('Informe a quantidade');
+                        return;
+                    }
+                    loading.value = true;
+                    try {
+                        await api(`/apontamentos/${producaoAtual.value.id}/finalizar`, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                quantidade: formApontamento.value.quantidade,
+                                unidade: formApontamento.value.unidade,
+                                observacao: formApontamento.value.observacao
+                            })
+                        });
+                        showToast('Produção finalizada!');
+                        producaoAtual.value = null;
+                        formApontamento.value = { quantidade: '', unidade: 'un', observacao: '', tipo_perda: 'material', tipo_parada: 'manutencao' };
+                        page.value = 'home';
+                        loadApontamentos();
+                    } catch (e) { showToast(e.message); }
+                    loading.value = false;
+                }
+                
+                async function reportarPerda() {
+                    if (!producaoAtual.value) {
+                        showToast('Nenhuma produção em andamento');
+                        return;
+                    }
+                    loading.value = true;
+                    try {
+                        await api('/apontamentos/perda', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                ...formApontamento.value,
+                                ordem_producao_id: producaoAtual.value.ordem_producao_id,
+                                maquina_id: producaoAtual.value.maquina_id,
+                                produto_id: producaoAtual.value.produto_id
+                            })
+                        });
+                        showToast('Perda registrada!');
+                        formApontamento.value.observacao = '';
+                        loadApontamentos();
+                    } catch (e) { showToast(e.message); }
+                    loading.value = false;
+                }
+                
+                async function reportarParada() {
+                    if (!maquinaSelecionada.value) {
+                        showToast('Selecione uma máquina');
+                        return;
+                    }
+                    loading.value = true;
+                    try {
+                        await api('/apontamentos/parada', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                maquina_id: maquinaSelecionada.value.id,
+                                tipo_parada: formApontamento.value.tipo_parada,
+                                observacao: formApontamento.value.observacao
+                            })
+                        });
+                        showToast('Parada registrada!');
+                        formApontamento.value.observacao = '';
+                    } catch (e) { showToast(e.message); }
+                    loading.value = false;
+                }
+                
+                if (token.value) {
+                    page.value = 'home';
+                    loadInitialData();
+                }
+                
+                return {
+                    page, loginForm, loading, toastMsg, usuario, logout,
+                    ordensProducao, ordemSelecionada, maquinas, maquinaSelecionada,
+                    producaoAtual, formApontamento, apontamentosHoje,
+                    login, iniciarProducao, finalizarProducao, reportarPerda, reportarParada
+                };
+            },
+            template: `
+                <div v-if="toastMsg" class="toast">{{ toastMsg }}</div>
+                
+                <div v-if="page === 'login'" class="login-screen">
+                    <div class="login-card">
+                        <div class="login-logo">
+                            <h1>INPLAST</h1>
+                            <p>Apontamento de Produção</p>
+                        </div>
+                        <div class="input-group">
+                            <label>Código do Operador</label>
+                            <input v-model="loginForm.codigo" type="text" placeholder="Digite seu código" @keyup.enter="login">
+                        </div>
+                        <div class="input-group">
+                            <label>Senha</label>
+                            <input v-model="loginForm.password" type="password" placeholder="Digite sua senha" @keyup.enter="login">
+                        </div>
+                        <button class="btn btn-primary btn-large" @click="login" :disabled="loading">
+                            {{ loading ? 'Entrando...' : 'Entrar' }}
+                        </button>
+                    </div>
+                </div>
+                
+                <div v-else>
+                    <div class="app-header">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div>
+                                <h1>INPLAST</h1>
+                                <div class="subtitle">{{ usuario?.nome }}</div>
+                            </div>
+                            <button @click="logout" style="background:rgba(255,255,255,0.2);border:none;color:white;padding:8px 16px;border-radius:8px;font-size:13px;">
+                                Sair
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="main-content container">
+                        <div v-if="page === 'home'">
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Ordens de Produção</span>
+                                </div>
+                                <div v-if="ordensProducao.length === 0" style="text-align:center;padding:20px;color:var(--gray-500)">
+                                    Nenhuma ordem disponível
+                                </div>
+                                <div v-else>
+                                    <div v-for="op in ordensProducao" :key="op.id" 
+                                         class="op-card" 
+                                         :class="{ selected: ordemSelecionada?.id === op.id }"
+                                         @click="ordemSelecionada = op">
+                                        <div class="op-codigo">{{ op.codigo }}</div>
+                                        <div class="op-produto">{{ op.produto?.nome }}</div>
+                                        <div class="op-qtd">Prevista: {{ op.quantidade_prevista }} {{ op.produto?.unidade }}</div>
+                                        <span class="status-badge" :class="'status-' + op.status">{{ op.status }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Selecione a Máquina</span>
+                                </div>
+                                <div class="machine-grid">
+                                    <div v-for="m in maquinas" :key="m.id" 
+                                         class="machine-btn"
+                                         :class="{ selected: maquinaSelecionada?.id === m.id }"
+                                         @click="maquinaSelecionada = m">
+                                        <span class="icon">⚙️</span>
+                                        <span class="name">{{ m.nome }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-success btn-large" @click="iniciarProducao" :disabled="loading || !ordemSelecionada || !maquinaSelecionada">
+                                🚀 Iniciar Produção
+                            </button>
+                            
+                            <div v-if="apontamentosHoje.length" class="card" style="margin-top:20px">
+                                <div class="card-title" style="margin-bottom:12px">Apontamentos de Hoje</div>
+                                <div v-for="a in apontamentosHoje" :key="a.id" style="padding:10px;border-bottom:1px solid var(--gray-200)">
+                                    <div style="font-weight:600">{{ a.tipo_apontamento }}</div>
+                                    <div style="font-size:13px;color:var(--gray-500)">{{ a.maquina?.nome }} - {{ a.quantidade || 0 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-if="page === 'producao'">
+                            <div class="card">
+                                <div class="card-title" style="margin-bottom:16px">Produção em Andamento</div>
+                                <div class="stat-card">
+                                    <div class="stat-value">{{ ordemSelecionada?.codigo }}</div>
+                                    <div class="stat-label">{{ ordemSelecionada?.produto?.nome }}</div>
+                                </div>
+                                <div style="margin-top:12px;text-align:center">
+                                    <span class="status-badge status-em-producao">Em Produção</span>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-title" style="margin-bottom:12px">Finalizar Produção</div>
+                                <div class="input-group">
+                                    <label>Quantidade Produzida</label>
+                                    <input v-model="formApontamento.quantidade" type="number" placeholder="0">
+                                </div>
+                                <div class="input-group">
+                                    <label>Unidade</label>
+                                    <select v-model="formApontamento.unidade">
+                                        <option value="un">Unidade</option>
+                                        <option value="kg">Kg</option>
+                                        <option value="cx">Caixa</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>Observação (opcional)</label>
+                                    <textarea v-model="formApontamento.observacao" rows="2" placeholder="Alguma observação?"></textarea>
+                                </div>
+                                <button class="btn btn-success" @click="finalizarProducao" :disabled="loading">
+                                    ✅ Finalizar Produção
+                                </button>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-title" style="margin-bottom:12px">Reportar Perda</div>
+                                <div class="input-group">
+                                    <label>Quantidade</label>
+                                    <input v-model="formApontamento.quantidade" type="number" placeholder="0">
+                                </div>
+                                <div class="input-group">
+                                    <label>Tipo de Perda</label>
+                                    <select v-model="formApontamento.tipo_perda">
+                                        <option value="material">Material</option>
+                                        <option value="equipamento">Equipamento</option>
+                                        <option value="operacional">Operacional</option>
+                                        <option value="qualidade">Qualidade</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>Descrição</label>
+                                    <textarea v-model="formApontamento.observacao" rows="2"></textarea>
+                                </div>
+                                <button class="btn btn-danger" @click="reportarPerda" :disabled="loading">
+                                    ⚠️ Registrar Perda
+                                </button>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-title" style="margin-bottom:12px">Reportar Parada</div>
+                                <div class="input-group">
+                                    <label>Tipo de Parada</label>
+                                    <select v-model="formApontamento.tipo_parada">
+                                        <option value="manutencao">Manutenção</option>
+                                        <option value="ajuste">Ajuste</option>
+                                        <option value="falta_material">Falta Material</option>
+                                        <option value="falta_produto">Falta Produto</option>
+                                        <option value="outros">Outros</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>Descrição</label>
+                                    <textarea v-model="formApontamento.observacao" rows="2"></textarea>
+                                </div>
+                                <button class="btn btn-outline" @click="reportarParada" :disabled="loading">
+                                    🛑 Registrar Parada
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bottom-nav">
+                        <button class="nav-btn" :class="{ active: page === 'home' }" @click="page = 'home'">
+                            <span class="icon">🏠</span>
+                            <span>Início</span>
+                        </button>
+                        <button class="nav-btn" :class="{ active: page === 'producao' }" @click="page = 'producao'">
+                            <span class="icon">⚡</span>
+                            <span>Produção</span>
+                        </button>
+                    </div>
+                </div>
+            `
+        }).mount('#app');
+    </script>
+</body>
+</html>
