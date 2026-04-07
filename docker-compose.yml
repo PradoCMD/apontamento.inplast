@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: laraapt/apontamento-inplast:latest
     container_name: inplast_aponta_app
     restart: unless-stopped
     ports:
@@ -20,19 +19,14 @@ services:
       DB_DATABASE: inplast_apontamento
       DB_USERNAME: inplast
       DB_PASSWORD: Inplast@2026#Aponta
-      SANCTUM_STATEFUL_DOMAINS: apunta.inplast.local:4001
+      SANCTUM_STATEFUL_DOMAINS: aponta.inplast.local:4001
       CORS_ALLOWED_ORIGINS: http://aponta.inplast.local:4001
       SANkHYA_ENABLED: "false"
-      SANkHYA_URL: https://api.sankhya.com.br
       N8N_ENABLED: "false"
-      N8N_URL: http://n8n:5678
       JWT_SECRET: inplast-jwt-secret-key-2026-aponta-producao
-      PHP_UPLOAD_MAX_FILESIZE: 20M
-      PHP_POST_MAX_SIZE: 20M
     volumes:
       - storage:/var/www/html/storage
       - cache:/var/www/html/bootstrap/cache
-      - ./public:/var/www/html/public
 
 volumes:
   storage:
